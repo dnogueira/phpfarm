@@ -113,9 +113,26 @@ cd "$srcdir"
 ./configure \
  --prefix="$instdir" \
  --exec-prefix="$instdir" \
+ \
+ --disable-all \
+ --disable-rpath \
+ --disable-static \
+ \
+ --disable-cgi \
+ --enable-fpm \
+ --with-fpm-user=www-data \
+ --with-fpm-group=www-data \
+ \
+ --enable-maintainer-zts \
  --enable-debug \
+ --with-layout=GNU \
+ --with-config-file-path="$instdir/etc/" \
+ --with-config-file-scan-dir="$instdir/etc/conf.d/" \
  --disable-short-tags \
+ --enable-dtrace \
+ \
  --without-pear \
+ CC=gcc CFLAGS="-O3 -march=native" \
  $configoptions
 
 if [ $? -gt 0 ]; then
@@ -124,8 +141,8 @@ if [ $? -gt 0 ]; then
 fi
 
 #compile sources
-#make clean
-make
+make clean
+make -j4
 if [ "$?" -gt 0 ]; then
     echo make failed.
     exit 4
@@ -140,7 +157,7 @@ fi
 #copy php.ini
 #you can define your own ini target directory by setting $initarget
 if [ "x$initarget" = x ]; then
-    initarget="$instdir/lib/php.ini"
+    initarget="$instdir/etc/php.ini"
 fi
 if [ -f "php.ini-development" ]; then
     #php 5.3
@@ -150,7 +167,7 @@ elif [ -f "php.ini-recommended" ]; then
     cp "php.ini-recommended" "$initarget"
 else
     echo "No php.ini file found."
-    echo "Please copy it manually to $instdir/lib/php.ini"
+    echo "Please copy it manually to $instdir/etc/php.ini"
 fi
 #set default ini values
 cd "$basedir"
